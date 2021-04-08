@@ -1,39 +1,41 @@
 package com.fmlfpl.fplUpdates.reports;
 
+import static com.fmlfpl.fplUpdates.util.DiscordIDsUtility.getDiscordIDs;
+
 import static com.fmlfpl.fplUpdates.FplUpdatesApplication.BREAK;
 import static com.fmlfpl.fplUpdates.FplUpdatesApplication.LINEBREAK;
 
 public class LeagueReport {
     //summary values
     int topScore = 0;
-    public String topScoringTeam = "";
+    public int topScoringTeamID = -1;
 
     int lowestScore = Integer.MAX_VALUE;
-    public String lowestScoringTeam = "";
+    public int lowestScoringTeamID = -1;
 
     int totalScore = 0;
     int totalTeams = 0;
     int averageScore = 0;
 
     int biggestDiff = 0;
-    public String biggestDiffWinningTeam = "";
-    public String biggestDiffLosingTeam = "";
+    public int biggestDiffWinningTeamID = -1;
+    public int biggestDiffLosingTeamID = -1;
 
     int smallestDiff = 0;
     int numDraws = 0;
 
     //Utility Methods
-    public void checkTopScore(int score, String teamName){
+    public void checkTopScore(int score, int teamID){
         if(score > topScore){
             topScore = score;
-            topScoringTeam = teamName;
+            topScoringTeamID = teamID;
         }
     }
 
-    public void checkLowestScore(int score, String teamName){
+    public void checkLowestScore(int score, int teamID){
         if(score < lowestScore){
             lowestScore = score;
-            lowestScoringTeam = teamName;
+            lowestScoringTeamID = teamID;
         }
     }
 
@@ -45,7 +47,7 @@ public class LeagueReport {
         totalTeams += numTeams;
     }
 
-    public void checkDiff(int points1, String team1, int points2, String team2){
+    public void checkDiff(int points1, int id1, int points2, int id2){
         //omit draws from the diff, when calculating the smallest narrowest win margin we want to omit draws
         if(points1 == points2){return;}
 
@@ -54,8 +56,8 @@ public class LeagueReport {
         if(diff > biggestDiff){
             this.biggestDiff = diff;
 
-            if(points1 > points2){this.biggestDiffWinningTeam = team1; this.biggestDiffLosingTeam = team2;}
-            else{this.biggestDiffWinningTeam = team2; this.biggestDiffLosingTeam = team1;}
+            if(points1 > points2){this.biggestDiffWinningTeamID = id1; this.biggestDiffLosingTeamID = id2;}
+            else{this.biggestDiffWinningTeamID = id2; this.biggestDiffLosingTeamID = id1;}
         }
     }
 
@@ -64,12 +66,12 @@ public class LeagueReport {
         else {averageScore = totalScore / totalTeams;};
     }
 
-    public void process(int points1, String name1, int points2, String name2){
-        this.checkTopScore(points1, name1);
-        this.checkTopScore(points2, name2);
-        this.checkLowestScore(points1, name1);
-        this.checkLowestScore(points2, name2);
-        this.checkDiff(points1, name1, points2, name2);
+    public void process(int points1, int id1, int points2, int id2){
+        this.checkTopScore(points1, id1);
+        this.checkTopScore(points2, id2);
+        this.checkLowestScore(points1, id1);
+        this.checkLowestScore(points2, id2);
+        this.checkDiff(points1, id1, points2, id2);
         this.incrementTotalScore(points1 + points2);
         this.incrementTotalTeams(2);
         this.calculateAverage();
@@ -80,9 +82,9 @@ public class LeagueReport {
 
         returnString += LINEBREAK;
         returnString += "League Roundup: " + BREAK;
-        returnString += "The team with the top score was: " + getTopScore() + ", by: " + topScoringTeam + BREAK;
-        returnString += "The team with the lowest score was: " + getLowestScore() + ", by: " + lowestScoringTeam + BREAK;
-        returnString += "The biggest winning margin was: " + getBiggestDiff() + ", by: " + biggestDiffWinningTeam + " against " + biggestDiffLosingTeam + BREAK;
+        returnString += "The team with the top score was: " + getTopScore() + ", by: " + getDiscordIDs().getDiscordIDGivenFplID(topScoringTeamID) + BREAK;
+        returnString += "The team with the lowest score was: " + getLowestScore() + ", by: " + getDiscordIDs().getDiscordIDGivenFplID(lowestScoringTeamID) + BREAK;
+        returnString += "The biggest winning margin was: " + getBiggestDiff() + ", by: " + getDiscordIDs().getDiscordIDGivenFplID(biggestDiffWinningTeamID) + " against " + getDiscordIDs().getDiscordIDGivenFplID(biggestDiffLosingTeamID) + BREAK;
         returnString += "The combined points total in this league was: " + getTotalScore() + BREAK;
         returnString += "The average weekly score in this league was: " + getAverageScore() + BREAK;
         returnString += LINEBREAK;
@@ -100,12 +102,12 @@ public class LeagueReport {
         this.topScore = topScore;
     }
 
-    public String getTopScoringTeam() {
-        return topScoringTeam;
+    public int getTopScoringTeamID() {
+        return topScoringTeamID;
     }
 
-    public void setTopScoringTeam(String topScoringTeam) {
-        this.topScoringTeam = topScoringTeam;
+    public void setTopScoringTeamID(int topScoringTeamID) {
+        this.topScoringTeamID = topScoringTeamID;
     }
 
     public int getLowestScore() {
@@ -116,12 +118,12 @@ public class LeagueReport {
         this.lowestScore = lowestScore;
     }
 
-    public String getLowestScoringTeam() {
-        return lowestScoringTeam;
+    public int getLowestScoringTeamID() {
+        return lowestScoringTeamID;
     }
 
-    public void setLowestScoringTeam(String lowestScoringTeam) {
-        this.lowestScoringTeam = lowestScoringTeam;
+    public void setLowestScoringTeam(int lowestScoringTeamID) {
+        this.lowestScoringTeamID = lowestScoringTeamID;
     }
 
     public int getTotalScore() {
@@ -156,20 +158,20 @@ public class LeagueReport {
         this.biggestDiff = biggestDiff;
     }
 
-    public String getBiggestDiffWinningTeam() {
-        return biggestDiffWinningTeam;
+    public int getBiggestDiffWinningTeamID() {
+        return biggestDiffWinningTeamID;
     }
 
-    public void setBiggestDiffWinningTeam(String biggestDiffWinningTeam) {
-        this.biggestDiffWinningTeam = biggestDiffWinningTeam;
+    public void setBiggestDiffWinningTeamID(int biggestDiffWinningTeamID) {
+        this.biggestDiffWinningTeamID = biggestDiffWinningTeamID;
     }
 
-    public String getBiggestDiffLosingTeam() {
-        return biggestDiffLosingTeam;
+    public int getBiggestDiffLosingTeamID() {
+        return biggestDiffLosingTeamID;
     }
 
-    public void setBiggestDiffLosingTeam(String biggestDiffLosingTeam) {
-        this.biggestDiffLosingTeam = biggestDiffLosingTeam;
+    public void setBiggestDiffLosingTeam(int biggestDiffLosingTeamID) {
+        this.biggestDiffLosingTeamID = biggestDiffLosingTeamID;
     }
 
     public int getSmallestDiff() {

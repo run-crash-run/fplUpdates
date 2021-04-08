@@ -59,7 +59,7 @@ public class FplUpdatesApplication {
 		String rawSummary = fetchRawSummary(leagueID);
 		populateSummary(rawSummary);
 
-		//TODO - handle pagination, fine for now as leagues are capped at 20 teams
+		//TODO - handle pagination for over 150 teams, fine for now as leagues are capped at 20 teams
 		String rawResults = fetchRawResults(leagueID, "1", gameweekID);
 		populateResults(rawResults);
 
@@ -69,9 +69,56 @@ public class FplUpdatesApplication {
 		return pageContent;
 	}
 
+	@RequestMapping("/tier/{tierID}/gw/{gameweekID}")
+	@ResponseBody
+	String callLeagueEndpointWithCorrectLeagueForTier(@PathVariable String tierID, @PathVariable String gameweekID){
+		//For convenience someone can send the tier rather than the league id
+		String leagueID;
+
+		switch (tierID){
+			case "1":
+				leagueID = "491871";
+				break;
+			case "2":
+				leagueID = "503079";
+				break;
+			case "3":
+				leagueID = "491704";
+				break;
+			case "4":
+				leagueID = "491790";
+				break;
+			case "5":
+				leagueID = "491800";
+				break;
+			case "6":
+				leagueID = "499989";
+				break;
+			case "7":
+				leagueID = "491618";
+				break;
+			case "8":
+				leagueID = "499343";
+				break;
+			case "9":
+				leagueID = "496213";
+				break;
+			case "10":
+				leagueID = "496426";
+				break;
+			case "11":
+				leagueID = "587124";
+				break;
+			default:
+				System.out.println("No league found for provided tier");
+				return "";
+		}
+
+		return createLeagueResponse(leagueID, gameweekID);
+	}
+
 	private String fetchRawResults(String league, String page, String gw){
 		String endpoint = URLbase + league + URLpageParam + page + URLeventParam + gw;
-
 
 		Document doc = null;
 		try {
@@ -120,7 +167,7 @@ public class FplUpdatesApplication {
 			});
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			System.out.println("Something went wrong with the object mapper when reading hth match");
+			System.out.println("Something went wrong with the object mapper when reading h2h match");
 		}
 	}
 
@@ -141,7 +188,7 @@ public class FplUpdatesApplication {
 		}
 
 		for (Result r : results){
-			leagueReport.process(r.getEntry_1_points(), r.getEntry_1_name(), r.getEntry_2_points(), r.getEntry_2_player_name());
+			leagueReport.process(r.getEntry_1_points(), r.getEntry_1_entry(), r.getEntry_2_points(), r.getEntry_2_entry());
 			matchReport.process(r);
 		}
 	}
@@ -149,7 +196,7 @@ public class FplUpdatesApplication {
 	private void populatePageContent(){
 		pageContent += leagueReport.printReport();
 		pageContent += leagueStandingsReport.printReport();
-		pageContent += matchReport.printReport();
+		pageContent += matchReport.printReport(leagueReport.getAverageScore());
 	}
 
 	public static void main(String[] args) {

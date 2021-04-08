@@ -8,25 +8,35 @@ import org.jsoup.nodes.Document;
 
 public class Team {
     String endpointPrefix = "https://fantasy.premierleague.com/api/entry/";
-    String endpointSuffix = "/event/29/picks/";
+    String endpointSuffix = "/event/";
+    String endpointSuffix2 = "/picks/";
 
     String teamName;
     int teamID;
     String discordID;
-    String activeChip ;
+    String activeChip;
     int benchPoints;
+    int gw;
 
     EventHistory thisGameweek;
 
-    public Team(String teamName, int teamID) {
+    public Team(String teamName, int teamID, int gw) {
         this.teamName = teamName;
         this.teamID = teamID;
         this.discordID = DiscordIDsUtility.getDiscordIDs().getDiscordIDGivenFplID(teamID);
+        this.gw = gw;
         this.fetchRawTeamData(teamID);
     }
 
     private void fetchRawTeamData(int teamID){
-        String endpoint = endpointPrefix + teamID + endpointSuffix;
+        //If a league has an uneven number of teams then FPL adds one called AVERAGE with a team id of 0 (It gets the average points each week)
+        if(0 == teamID){
+            teamName = "AVERAGE!";
+            thisGameweek = new EventHistory();
+            return;
+        }
+
+        String endpoint = endpointPrefix + teamID + endpointSuffix + gw + endpointSuffix2;
 
         Document doc = null;
         try {
